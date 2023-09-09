@@ -7,10 +7,17 @@ using Random = UnityEngine.Random;
 
 public class GameManager : MonoBehaviour
 {
+    public static GameManager Instance;
+
+    public Sprite questionMarkSprite;
+
+    public Text WarningText_01;
+
+    public Text WarningText_02;
 
     public int PlayerScore;
 
-    public List<MatchData> matchDatas = new List<MatchData>();
+    public List<MatchData> MatchDatas = new List<MatchData>();
 
     private int _singlePairSelected;
 
@@ -22,7 +29,7 @@ public class GameManager : MonoBehaviour
         _2x3,_3x2
     };
 
-    private int _totalCards;
+   public int TotalCards;
     
     public Layouts SelectedUserLayout;
     public Text ShowPlayerScoreText;
@@ -38,9 +45,18 @@ public class GameManager : MonoBehaviour
     public GameObject LayoutPanel;
     public GameObject GamePanel;
 
-    private List<MatchCard> matchCards = new List<MatchCard>();
+    public List<MatchCard> MatchCards = new List<MatchCard>();
 
     private AudioSource _audioSource;
+
+    private void Awake()
+    {
+        Debug.LogError(Application.persistentDataPath);
+        if(Instance == null)
+        {
+            Instance = this;
+        }
+    }
 
     private void Start()
     {
@@ -59,17 +75,17 @@ public class GameManager : MonoBehaviour
         {
             SelectedUserLayout = Layouts._2x3;
             gameplayCardsScrollView.content.GetComponent<GridLayoutGroup>().constraintCount = 3;
-            _totalCards = 2 * 3;
+            TotalCards = 2 * 3;
         }
         else
         {
             SelectedUserLayout = Layouts._3x2;
             gameplayCardsScrollView.content.GetComponent<GridLayoutGroup>().constraintCount = 2;
-            _totalCards = 3 * 2;
+            TotalCards = 3 * 2;
         }
         GamePanel.SetActive(true);
         LayoutPanel.SetActive(false);
-        StartCoroutine(StartGame());
+        StartCoroutine(StartGame(true));
     }
 
     public IEnumerator FillData()
@@ -80,20 +96,20 @@ public class GameManager : MonoBehaviour
         while(i != 6)
         {
             
-            if(i < (_totalCards / 2))
+            if(i < (TotalCards / 2))
             {
-                var selectedDataForCard = Random.Range(0, matchDatas.Count);
-                if (matchDatas[selectedDataForCard].AmISelected == false)
+                var selectedDataForCard = Random.Range(0, MatchDatas.Count);
+                if (MatchDatas[selectedDataForCard].AmISelected == false)
                 {
-                    var selectRandomIndex = Random.Range(0, _totalCards);
+                    var selectRandomIndex = Random.Range(0, TotalCards);
                     if (!previousRandomSelectedIndex.Contains(selectRandomIndex))
                     {
                         previousRandomSelectedIndex.Add(selectRandomIndex);
-                        matchDatas[selectedDataForCard].AmISelected = true;
+                        MatchDatas[selectedDataForCard].AmISelected = true;
                         yield return new WaitForSeconds(0.1f);
-                        matchCards[selectRandomIndex].matchFruitsForCard.Fruits = matchDatas[selectedDataForCard].Fruits;
-                        matchCards[selectRandomIndex].matchFruitsForCard.FruitImage = matchDatas[selectedDataForCard].FruitImage;
-                        matchCards[selectRandomIndex].matchFruitsForCard.AmISelected = matchDatas[selectedDataForCard].AmISelected;
+                        MatchCards[selectRandomIndex].matchFruitsForCard.Fruits = MatchDatas[selectedDataForCard].Fruits;
+                        MatchCards[selectRandomIndex].matchFruitsForCard.FruitImage = MatchDatas[selectedDataForCard].FruitImage;
+                        MatchCards[selectRandomIndex].matchFruitsForCard.AmISelected = MatchDatas[selectedDataForCard].AmISelected;
                         yield return new WaitForSeconds(0.1f);
                         i++;
                     }
@@ -102,17 +118,17 @@ public class GameManager : MonoBehaviour
             }
             else
             {
-                    var returnDataMatchedCards = matchDatas.FindAll((x) => x.AmISelected);
+                    var returnDataMatchedCards = MatchDatas.FindAll((x) => x.AmISelected);
                     var selectRandomMatchedCard = Random.Range(0, returnDataMatchedCards.Count);
-                    var selectRandomIndex = Random.Range(0, _totalCards);
+                    var selectRandomIndex = Random.Range(0, TotalCards);
                     if (!previousRandomSelectedIndex.Contains(selectRandomIndex) & !previousRandomMatchedSelectedIndex.Contains(selectRandomMatchedCard))
                     {
                         previousRandomSelectedIndex.Add(selectRandomIndex);
                         previousRandomMatchedSelectedIndex.Add(selectRandomMatchedCard);
                         yield return new WaitForSeconds(0.1f);
-                        matchCards[selectRandomIndex].matchFruitsForCard.Fruits = returnDataMatchedCards[selectRandomMatchedCard].Fruits;
-                        matchCards[selectRandomIndex].matchFruitsForCard.FruitImage = returnDataMatchedCards[selectRandomMatchedCard].FruitImage;
-                        matchCards[selectRandomIndex].matchFruitsForCard.AmISelected = returnDataMatchedCards[selectRandomMatchedCard].AmISelected;
+                    MatchCards[selectRandomIndex].matchFruitsForCard.Fruits = returnDataMatchedCards[selectRandomMatchedCard].Fruits;
+                    MatchCards[selectRandomIndex].matchFruitsForCard.FruitImage = returnDataMatchedCards[selectRandomMatchedCard].FruitImage;
+                    MatchCards[selectRandomIndex].matchFruitsForCard.AmISelected = returnDataMatchedCards[selectRandomMatchedCard].AmISelected;
                         yield return new WaitForSeconds(0.1f);
                         i++;
                     }
@@ -122,17 +138,67 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    public IEnumerator StartGame()
+    public IEnumerator StartGame(bool newGame,DataToSave dataLoad = null)
     {
         yield return new WaitForSeconds(0.5f);
-        for(int i = 0; i < _totalCards; i++)
+        for (int i = 0; i < TotalCards; i++)
         {
             MatchCard _cardInstantiated = Instantiate(CardPrefab, gameplayCardsScrollView.content).GetComponent<MatchCard>();
             _cardInstantiated.GetComponent<Button>().onClick.AddListener(() => CardSelected(_cardInstantiated));
             yield return new WaitForSeconds(0.5f);
-            matchCards.Add(_cardInstantiated);
+            MatchCards.Add(_cardInstantiated);
         }
-        StartCoroutine(FillData());
+        yield return new WaitForEndOfFrame();
+        if (newGame)
+        {
+            StartCoroutine(FillData());
+        }
+        else
+        {
+            StartCoroutine(FillLoadedData(dataLoad));
+        }
+    }
+
+    IEnumerator FillLoadedData(DataToSave loadData)
+    {
+        for(int i = 0; i < loadData.cardFruitName.Count;i++)
+        {
+            MatchCards[i].matchFruitsForCard.FruitName = loadData.cardFruitName[i];
+            if (loadData.cardFruitName[i] == "Apple")
+            {
+                MatchCards[i].matchFruitsForCard.Fruits = MatchFruits.Apple;
+                MatchCards[i].matchFruitsForCard.FruitImage = MatchDatas[0].FruitImage;
+            }
+            else if (loadData.cardFruitName[i] == "Mango")
+            {
+                MatchCards[i].matchFruitsForCard.Fruits = MatchFruits.Mango;
+                MatchCards[i].matchFruitsForCard.FruitImage = MatchDatas[1].FruitImage;
+            }
+            else if (loadData.cardFruitName[i] == "Banana")
+            {
+                MatchCards[i].matchFruitsForCard.Fruits = MatchFruits.Banana;
+                MatchCards[i].matchFruitsForCard.FruitImage = MatchDatas[2].FruitImage;
+            }
+            else if (loadData.cardFruitName[i] == "Orange")
+            {
+                MatchCards[i].matchFruitsForCard.Fruits = MatchFruits.Orange;
+                MatchCards[i].matchFruitsForCard.FruitImage = MatchDatas[3].FruitImage;
+            }
+            else if (loadData.cardFruitName[i] == "Peach")
+            {
+                MatchCards[i].matchFruitsForCard.Fruits = MatchFruits.Peach;
+                MatchCards[i].matchFruitsForCard.FruitImage = MatchDatas[4].FruitImage;
+            }
+        }
+        yield return null;
+    }
+
+    public void LoadGameToUser(DataToSave dataToLoad)
+    {
+        GamePanel.SetActive(true);
+        MainPanel.SetActive(false);
+        ShowPlayerScoreText.text = PlayerScore.ToString();
+        StartCoroutine(StartGame(false,dataToLoad));
     }
 
     public void CardSelected(MatchCard selectedCard)
@@ -223,17 +289,17 @@ public class GameManager : MonoBehaviour
             yield return new WaitForSeconds(0.1f);
             ShowPlayerScoreText.text = PlayerScore.ToString();
             yield return new WaitForSeconds(0.1f);
-            matchCards.Remove(_firstCard);
+            MatchCards.Remove(_firstCard);
             yield return new WaitForSeconds(0.1f);
-            matchCards.Remove(_secondCard);
+            MatchCards.Remove(_secondCard);
             yield return new WaitForSeconds(0.1f);
-            _totalCards -= 2;
+            TotalCards -= 2;
             yield return new WaitForSeconds(0.1f);
             Destroy(_firstCard.gameObject);
             yield return new WaitForSeconds(0.1f);
             Destroy(_secondCard.gameObject);
             yield return new WaitForSeconds(0.1f);
-            if(_totalCards <= 0)
+            if(TotalCards <= 0)
             {
                 ResetGame();
             }
@@ -260,6 +326,7 @@ public class GameManager : MonoBehaviour
 [Serializable]
 public class MatchData
 {
+    public string FruitName;
     public MatchFruits Fruits;
     public Sprite FruitImage;
     public bool AmISelected;

@@ -2,6 +2,9 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using System;
+
+[Serializable]
 public class MatchCard : MonoBehaviour
 {
     [HideInInspector]
@@ -28,7 +31,7 @@ public class MatchCard : MonoBehaviour
         else
         {
             BgImage.color = _unSelectedColor;
-            matchObjImage.sprite = UnSelectedMatchObjectImage;
+            matchObjImage.sprite = GameManager.Instance.questionMarkSprite;
         }
     }
 }
