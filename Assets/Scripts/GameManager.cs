@@ -195,6 +195,16 @@ public class GameManager : MonoBehaviour
 
     public void LoadGameToUser(DataToSave dataToLoad)
     {
+        if (dataToLoad.layoutSelected == 0)
+        {
+            SelectedUserLayout = Layouts._2x3;
+            gameplayCardsScrollView.content.GetComponent<GridLayoutGroup>().constraintCount = 3;
+        }
+        else
+        {
+            SelectedUserLayout = Layouts._3x2;
+            gameplayCardsScrollView.content.GetComponent<GridLayoutGroup>().constraintCount = 2;
+        }
         GamePanel.SetActive(true);
         MainPanel.SetActive(false);
         ShowPlayerScoreText.text = PlayerScore.ToString();

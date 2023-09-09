@@ -9,6 +9,7 @@ using System.Collections.Generic;
 [Serializable]
 public class DataToSave
 {
+    public int layoutSelected;
     public int SavedPlayerScore;
     public List<string> cardFruitName = new List<string>();
     public int TotalCards;
@@ -49,6 +50,15 @@ public class SaveLoadDataManager : MonoBehaviour
                     saveData.cardFruitName.Add("Peach");
                     break;
             }
+        }
+        switch(GameManager.Instance.SelectedUserLayout)
+        {
+            case GameManager.Layouts._2x3:
+                saveData.layoutSelected = 0;
+                break;
+            case GameManager.Layouts._3x2:
+                saveData.layoutSelected = 1;
+                break;
         }
             BinaryFormatter binaryFormatter = new BinaryFormatter();
             var directoryName = Path.GetDirectoryName(savePathOfFile);
