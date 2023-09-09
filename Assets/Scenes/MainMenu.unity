@@ -262,6 +262,17 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c3b7271bb86e4374985cce85e57f7227, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  matchDatas:
+  - Fruits: 0
+    FruitImage: {fileID: 21300000, guid: f843d5825e368034b9a09a9255f360b9, type: 3}
+  - Fruits: 1
+    FruitImage: {fileID: 21300000, guid: dd7dc58bc72ea224abc68678db53ce9f, type: 3}
+  - Fruits: 2
+    FruitImage: {fileID: 21300000, guid: 23abc29f62c7ebf4aa2dddf0d137e5f9, type: 3}
+  - Fruits: 3
+    FruitImage: {fileID: 21300000, guid: 87ec67b3274e7f24b8f19d0f33c9b85d, type: 3}
+  - Fruits: 4
+    FruitImage: {fileID: 21300000, guid: 217dbacc7406a524db7877541d343a19, type: 3}
   SelectedUserLayout: 0
   gameplayCardsScrollView: {fileID: 107792792}
   CardPrefab: {fileID: 3185104117290327725, guid: 88b974b921187bd40aaafe376db73324, type: 3}

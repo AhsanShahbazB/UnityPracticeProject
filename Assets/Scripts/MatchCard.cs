@@ -7,7 +7,7 @@ public class MatchCard : MonoBehaviour
     [HideInInspector]
     public Sprite SelectedMatchObjectImage;
 
-
+    public MatchData matchFruitsForCard;
     public Sprite UnSelectedMatchObjectImage;
     private Color _selectedColor = Color.green;
     private Color _unSelectedColor = Color.cyan;
@@ -23,7 +23,7 @@ public class MatchCard : MonoBehaviour
         if(IsSelected)
         {
             BgImage.color = _selectedColor;
-        //    matchObjImage.sprite = SelectedMatchObjectImage;
+            matchObjImage.sprite = matchFruitsForCard.FruitImage;
         }
         else
         {
